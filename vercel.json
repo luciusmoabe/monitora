@@ -1,5 +1,19 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/painel_controle_pmba.html" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "painel_controle_pmba.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/painel_controle_pmba.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
   ]
 }
