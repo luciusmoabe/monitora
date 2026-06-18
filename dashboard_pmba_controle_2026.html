@@ -1,0 +1,372 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.dash{padding:1rem 0}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px}
+.header-left{display:flex;align-items:center;gap:12px}
+.badge-org{font-size:11px;padding:3px 10px;border-radius:20px;background:#E6F1FB;color:#0C447C;font-weight:500;border:0.5px solid #B5D4F4}
+.title-row{font-size:20px;font-weight:500;color:var(--color-text-primary);line-height:1.2}
+.subtitle-row{font-size:13px;color:var(--color-text-secondary);margin-top:2px}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.filter-bar label{font-size:12px;color:var(--color-text-secondary)}
+.filter-bar select{font-size:13px;padding:5px 10px;border-radius:var(--border-radius-md);height:32px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.25rem}
+.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.9rem 1rem}
+.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-value{font-size:20px;font-weight:500;color:var(--color-text-primary);line-height:1.1}
+.metric-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:3px}
+.metric-card.accent{background:#E6F1FB}
+.metric-card.accent .metric-label{color:#185FA5}
+.metric-card.accent .metric-value{color:#0C447C}
+.metric-card.accent .metric-sub{color:#378ADD}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.chart-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:0.75rem}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:var(--color-text-secondary)}
+.leg-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;flex-shrink:0}
+.table-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:1.25rem}
+.table-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:0.75rem;display:flex;align-items:center;justify-content:space-between}
+table.data-table{width:100%;font-size:12px;border-collapse:collapse}
+table.data-table th{font-weight:500;color:var(--color-text-secondary);text-align:left;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;white-space:nowrap}
+table.data-table td{padding:5px 8px;color:var(--color-text-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+table.data-table tr:last-child td{border-bottom:none}
+table.data-table tr:hover td{background:var(--color-background-secondary)}
+.bar-cell{display:flex;align-items:center;gap:6px}
+.bar-bg{flex:1;height:6px;background:var(--color-background-tertiary);border-radius:3px;overflow:hidden;min-width:40px}
+.bar-fill{height:100%;border-radius:3px;background:#378ADD}
+.tipo-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.tipo-contrato{background:#EAF3DE;color:#3B6D11}
+.tipo-ac{background:#FAEEDA;color:#854F0B}
+@media(max-width:600px){.charts-row{grid-template-columns:1fr}.charts-row .chart-card.full{grid-column:1}}
+</style>
+
+<div class="dash">
+  <div class="header">
+    <div class="header-left">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          <span class="badge-org"><i class="ti ti-shield" aria-hidden="true"></i> Polícia Militar da Bahia</span>
+        </div>
+        <div class="title-row">Painel de Controle de Liquidações</div>
+        <div class="subtitle-row">Exercício 2026 · Planilha Controle · 1.384 liquidações</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="sendPrompt('Quais são as principais observações e pontos de atenção nos dados do painel de controle de liquidações da PMBA 2026?')" style="font-size:12px;padding:5px 12px">Análise ↗</button>
+      <button onclick="sendPrompt('Quais credores concentram mais de 20% dos gastos na planilha Controle?')" style="font-size:12px;padding:5px 12px">Concentração ↗</button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <label>Mês:</label>
+    <select id="selMes" onchange="updateAll()">
+      <option value="all">Todos</option>
+      <option value="1">Janeiro</option>
+      <option value="3">Março</option>
+      <option value="4">Abril</option>
+      <option value="5">Maio</option>
+      <option value="6">Junho</option>
+      <option value="11">Novembro</option>
+      <option value="12">Dezembro</option>
+    </select>
+    <label style="margin-left:8px">Tipo:</label>
+    <select id="selTipo" onchange="updateAll()">
+      <option value="all">Todos</option>
+      <option value="Contrato">Contrato</option>
+      <option value="Autorização de Compra">Autorização de Compra</option>
+    </select>
+    <label style="margin-left:8px">Grupo:</label>
+    <select id="selGrupo" onchange="updateAll()">
+      <option value="all">Todos</option>
+      <option value="04">Investimentos</option>
+      <option value="03">Outras Despesas Correntes</option>
+    </select>
+  </div>
+
+  <div class="metrics" id="metricsRow"></div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Liquidações por mês (R$)</div>
+      <div id="leg1" class="legend"></div>
+      <div style="position:relative;height:200px"><canvas id="chartMes" role="img" aria-label="Gráfico de barras de liquidações por mês"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Tipo de instrumento</div>
+      <div id="leg2" class="legend"></div>
+      <div style="position:relative;height:200px"><canvas id="chartTipo" role="img" aria-label="Gráfico de rosca por tipo de instrumento"></canvas></div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Top 10 unidades gestoras — valor liquidado (R$)</div>
+      <div style="position:relative;height:320px"><canvas id="chartUG" role="img" aria-label="Gráfico horizontal das top unidades gestoras"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-title">
+      <span>Top 10 credores</span>
+      <span id="tableCount" style="font-size:11px;color:var(--color-text-secondary)"></span>
+    </div>
+    <table class="data-table" id="credorTable">
+      <thead><tr>
+        <th>#</th><th>Credor</th><th>Tipo</th><th>Valor liquidado</th><th>% do total</th><th>Participação</th>
+      </tr></thead>
+      <tbody id="credorBody"></tbody>
+    </table>
+  </div>
+
+  <div class="table-card">
+    <div class="table-title"><span>Distribuição por grupo de despesa e elemento</span></div>
+    <table class="data-table" id="grupoTable">
+      <thead><tr><th>Grupo de despesa</th><th>Elemento</th><th>Qtd. liquidações</th><th>Valor total (R$)</th><th>% do total</th></tr></thead>
+      <tbody id="grupoBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const RAW = [
+  {mes:1,tipo:"Contrato",grupo:"04",ug:"Departamento de Apoio Logístico",credor:"FORD MOTOR COMPANY BRASIL LTDA",elem:"52",valor:525000},
+  {mes:1,tipo:"Autorização de Compra",grupo:"04",ug:"Instituto de Ensino e Pesquisa",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:4400},
+  {mes:3,tipo:"Contrato",grupo:"03",ug:"Departamento de Apoio Logístico",credor:"CS Brasil Frotas S.A",elem:"33",valor:198699.50},
+  {mes:3,tipo:"Autorização de Compra",grupo:"04",ug:"Instituto de Ensino e Pesquisa",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:2990},
+  {mes:4,tipo:"Contrato",grupo:"04",ug:"Departamento de Apoio Logístico",credor:"BELLÁTRIX VEÍCULOS E SERVIÇOS LTDA",elem:"52",valor:1949074.40},
+  {mes:4,tipo:"Contrato",grupo:"04",ug:"Departamento de Apoio Logístico",credor:"FORD MOTOR COMPANY BRASIL LTDA",elem:"52",valor:228750},
+  {mes:4,tipo:"Contrato",grupo:"04",ug:"Comando de Policiamento em Missões Especiais",credor:"R J C DEFESA E AEROESPACIAL LTDA",elem:"52",valor:212325.23},
+  {mes:4,tipo:"Autorização de Compra",grupo:"04",ug:"Academia de Polícia Militar",credor:"ITALBRAS INDUSTRIA E COMERCIO DE MOVEIS DE ACO LTDA",elem:"52",valor:323809.58},
+  {mes:4,tipo:"Autorização de Compra",grupo:"03",ug:"Comando Especializado de Policiamento Rodoviário",credor:"REFLEX LINE LTDA",elem:"30",valor:215880},
+  {mes:4,tipo:"Autorização de Compra",grupo:"04",ug:"Departamento de Comunicação Social",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:144983.90},
+  {mes:5,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Policiamento em Missões Especiais",credor:"RESECO EXPORTACAO, IMPORTACAO, SERVICOS E COMERCIO LTDA",elem:"52",valor:605000},
+  {mes:5,tipo:"Autorização de Compra",grupo:"04",ug:"Departamento de Comunicação Social",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:33947.38},
+  {mes:5,tipo:"Contrato",grupo:"03",ug:"Departamento de Apoio Logístico",credor:"CS Brasil Frotas S.A",elem:"33",valor:35899.54},
+  {mes:5,tipo:"Autorização de Compra",grupo:"03",ug:"Comando de Políciamento Regional da Capital - Central",credor:"DENTECK LTDA",elem:"30",valor:25949.36},
+  {mes:6,tipo:"Autorização de Compra",grupo:"03",ug:"Comando de Políciamento Regional da Capital - Central",credor:"DENTECK LTDA",elem:"30",valor:44108.93},
+  {mes:11,tipo:"Contrato",grupo:"04",ug:"Departamento de Apoio Logístico",credor:"FORD MOTOR COMPANY BRASIL LTDA",elem:"52",valor:753750},
+  {mes:11,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Policiamento em Missões Especiais",credor:"RESECO EXPORTACAO, IMPORTACAO, SERVICOS E COMERCIO LTDA",elem:"52",valor:2323732.31},
+  {mes:11,tipo:"Autorização de Compra",grupo:"04",ug:"Departamento de Comunicação Social",credor:"CONDOR S/A INDUSTRIA QUIMICA",elem:"52",valor:1050000},
+  {mes:11,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Policiamento de Apoio Operacional",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:109046},
+  {mes:11,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Políciamento da Região Norte",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:30295},
+  {mes:12,tipo:"Contrato",grupo:"04",ug:"Departamento de Apoio Logístico",credor:"BELLÁTRIX VEÍCULOS E SERVIÇOS LTDA",elem:"52",valor:0},
+  {mes:12,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Políciamento da Região Sul",credor:"ITALBRAS INDUSTRIA E COMERCIO DE MOVEIS DE ACO LTDA",elem:"52",valor:97285.03},
+  {mes:12,tipo:"Contrato",grupo:"03",ug:"Corregedoria da Polícia Militar",credor:"EMPRESA GRAFICA DA BAHIA",elem:"40",valor:70106.32},
+  {mes:12,tipo:"Autorização de Compra",grupo:"04",ug:"Instituto de Ensino e Pesquisa",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:73609.29},
+  {mes:12,tipo:"Contrato",grupo:"04",ug:"Comando de Policiamento em Missões Especiais",credor:"R J C DEFESA E AEROESPACIAL LTDA",elem:"52",valor:567674.77},
+  {mes:12,tipo:"Autorização de Compra",grupo:"03",ug:"Comando de Políciamento Regional da Capital - Central",credor:"DENTECK LTDA",elem:"30",valor:118410.17},
+  {mes:12,tipo:"Autorização de Compra",grupo:"04",ug:"Companhia Independente de Policiamento Rodoviário-Itabuna",credor:"IDEA Tecnologia Ltda",elem:"52",valor:38800},
+  {mes:12,tipo:"Autorização de Compra",grupo:"03",ug:"Comando de Políciamento da Região Norte",credor:"DENTECK LTDA",elem:"30",valor:48365.72},
+  {mes:12,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Policiamento em Missões Especiais",credor:"RESECO EXPORTACAO, IMPORTACAO, SERVICOS E COMERCIO LTDA",elem:"52",valor:0},
+  {mes:12,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Políciamento Região Metropolitana de Salvador",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:28827.76},
+  {mes:12,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Operações Policiais Militares",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:25626.52},
+  {mes:12,tipo:"Autorização de Compra",grupo:"04",ug:"Comando de Políciamento da Região Norte",credor:"ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA",elem:"52",valor:0},
+];
+
+const TOTALS_MES = {1:529400,3:201689.50,4:2474773.11,5:700795.74,6:44108.93,11:3693523.41,12:2862691.11};
+const TOTALS_TIPO = {"Contrato":5814881.55,"Autorização de Compra":4692100.25};
+const TOTALS_UG = [
+  ["Departamento de Apoio Logístico",5875319.57],
+  ["Comando de Policiamento em Missões Especiais",2937532.31],
+  ["Academia de Polícia Militar",400785],
+  ["Comando Especializado de Policiamento Rodoviário",247903.15],
+  ["Comando de Políciamento Regional da Capital - Central",188468.46],
+  ["Departamento de Comunicação Social",178931],
+  ["Comando de Policiamento de Apoio Operacional",109046],
+  ["Comando de Políciamento da Região Sul",97285.03],
+  ["Comando de Políciamento da Região Norte",78661.09],
+  ["Instituto de Ensino e Pesquisa",77999.29],
+];
+const TOTALS_CREDOR = [
+  ["RESECO EXPORTACAO, IMPORTACAO, SERVICOS E COMERCIO LTDA","Autorização de Compra",2928732.31],
+  ["BELLÁTRIX VEÍCULOS E SERVIÇOS LTDA","Contrato",1949074.40],
+  ["CONDOR S/A INDUSTRIA QUIMICA","Autorização de Compra",1050000],
+  ["R J C DEFESA E AEROESPACIAL LTDA","Contrato",780000],
+  ["FORD MOTOR COMPANY BRASIL LTDA","Contrato",753750],
+  ["DENTECK LTDA","Autorização de Compra",599090],
+  ["ITALBRAS INDUSTRIA E COMERCIO DE MOVEIS DE ACO LTDA","Autorização de Compra",323809.58],
+  ["MOVEIS JB INDUSTRIA E COMERCIO LTDA","Autorização de Compra",279498],
+  ["REFLEX LINE LTDA","Autorização de Compra",228730],
+  ["ATIVA LICITACOES EMPREENDIMENTOS COMERCIAIS LTDA","Autorização de Compra",217523.28],
+];
+const TOTALS_GRUPO = [
+  ["04 - Investimentos","52 - Equipamento e Material Permanente",1182,9417577.80],
+  ["03 - Outras Despesas Correntes","30 - Material de Consumo",155,1089404.00],
+];
+const GRAND = 10523409.80;
+
+const mNomes = {1:"Jan",3:"Mar",4:"Abr",5:"Mai",6:"Jun",11:"Nov",12:"Dez"};
+let chartMes, chartTipo, chartUG;
+
+function fmt(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:0,maximumFractionDigits:0}).format(v)}
+function fmtShort(v){if(v>=1e6)return'R$ '+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'R$ '+(v/1e3).toFixed(0)+'K';return fmt(v)}
+
+function filtered(){
+  const mes=document.getElementById('selMes').value;
+  const tipo=document.getElementById('selTipo').value;
+  const grupo=document.getElementById('selGrupo').value;
+  return RAW.filter(r=>{
+    if(mes!=='all'&&String(r.mes)!==mes)return false;
+    if(tipo!=='all'&&r.tipo!==tipo)return false;
+    if(grupo!=='all'&&r.grupo!==grupo)return false;
+    return true;
+  });
+}
+
+function getMetrics(data){
+  const total=Object.values(TOTALS_MES).reduce((a,b)=>a+b,0);
+  const mesFilter=document.getElementById('selMes').value;
+  const tipoFilter=document.getElementById('selTipo').value;
+  const grupoFilter=document.getElementById('selGrupo').value;
+  let totalFiltered=0,contratoV=0,acV=0,investV=0,corrV=0;
+  let mesSet=new Set();
+
+  if(mesFilter==='all'&&tipoFilter==='all'&&grupoFilter==='all'){
+    totalFiltered=GRAND;
+    contratoV=TOTALS_TIPO["Contrato"];
+    acV=TOTALS_TIPO["Autorização de Compra"];
+    investV=TOTALS_GRUPO[0][3];
+    corrV=TOTALS_GRUPO[1][3];
+    mesSet=new Set([1,3,4,5,6,11,12]);
+  } else {
+    data.forEach(r=>{
+      totalFiltered+=r.valor;
+      if(r.tipo==="Contrato")contratoV+=r.valor;
+      else acV+=r.valor;
+      if(r.grupo==="04")investV+=r.valor;
+      else corrV+=r.valor;
+      mesSet.add(r.mes);
+    });
+  }
+  return{totalFiltered,contratoV,acV,investV,corrV,meses:mesSet.size,total};
+}
+
+function updateMetrics(data){
+  const m=getMetrics(data);
+  const mesFilter=document.getElementById('selMes').value;
+  const tipoFilter=document.getElementById('selTipo').value;
+  const grupoFilter=document.getElementById('selGrupo').value;
+  const isFiltered=mesFilter!=='all'||tipoFilter!=='all'||grupoFilter!=='all';
+  document.getElementById('metricsRow').innerHTML=`
+    <div class="metric-card accent">
+      <div class="metric-label"><i class="ti ti-coin" aria-hidden="true"></i> Total liquidado</div>
+      <div class="metric-value">${fmtShort(isFiltered?m.totalFiltered:GRAND)}</div>
+      <div class="metric-sub">1.384 liquidações · exercício 2026</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label"><i class="ti ti-file-invoice" aria-hidden="true"></i> Contratos</div>
+      <div class="metric-value">${fmtShort(isFiltered?m.contratoV:TOTALS_TIPO["Contrato"])}</div>
+      <div class="metric-sub">${((isFiltered?m.contratoV:TOTALS_TIPO["Contrato"])/(isFiltered?m.totalFiltered:GRAND)*100).toFixed(1)}% do total</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label"><i class="ti ti-shopping-cart" aria-hidden="true"></i> Aut. de compra</div>
+      <div class="metric-value">${fmtShort(isFiltered?m.acV:TOTALS_TIPO["Autorização de Compra"])}</div>
+      <div class="metric-sub">${((isFiltered?m.acV:TOTALS_TIPO["Autorização de Compra"])/(isFiltered?m.totalFiltered:GRAND)*100).toFixed(1)}% do total</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label"><i class="ti ti-building-bank" aria-hidden="true"></i> Investimentos</div>
+      <div class="metric-value">${fmtShort(isFiltered?m.investV:TOTALS_GRUPO[0][3])}</div>
+      <div class="metric-sub">Grupo 04 · elemento 52</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label"><i class="ti ti-receipt" aria-hidden="true"></i> Desp. correntes</div>
+      <div class="metric-value">${fmtShort(isFiltered?m.corrV:TOTALS_GRUPO[1][3])}</div>
+      <div class="metric-sub">Grupo 03 · elemento 30</div>
+    </div>
+  `;
+}
+
+function updateChartMes(){
+  const labels=Object.keys(TOTALS_MES).map(k=>mNomes[+k]);
+  const vals=Object.values(TOTALS_MES);
+  const mes=document.getElementById('selMes').value;
+  const bgColors=labels.map((_,i)=>{
+    const m=+Object.keys(TOTALS_MES)[i];
+    return (mes==='all'||+mes===m)?'#378ADD':'#B5D4F4';
+  });
+  if(chartMes){chartMes.destroy();}
+  document.getElementById('leg1').innerHTML=`<span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:#378ADD"></span>Valor liquidado (R$)</span>`;
+  chartMes=new Chart(document.getElementById('chartMes'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:bgColors,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{ticks:{callback:v=>fmtShort(v),font:{size:10}},grid:{color:'rgba(128,128,128,0.1)'}}}}
+  });
+}
+
+function updateChartTipo(){
+  if(chartTipo){chartTipo.destroy();}
+  const tipoFilter=document.getElementById('selTipo').value;
+  let vals,labels;
+  if(tipoFilter==='all'){
+    labels=['Contrato','Aut. de Compra'];
+    vals=[TOTALS_TIPO["Contrato"],TOTALS_TIPO["Autorização de Compra"]];
+  } else {
+    labels=[tipoFilter==='Contrato'?'Contrato':'Aut. de Compra'];
+    vals=[tipoFilter==='Contrato'?TOTALS_TIPO["Contrato"]:TOTALS_TIPO["Autorização de Compra"]];
+  }
+  const colors=['#378ADD','#EF9F27'];
+  document.getElementById('leg2').innerHTML=labels.map((l,i)=>`<span style="display:flex;align-items:center;gap:4px"><span class="leg-dot" style="background:${colors[i]}"></span>${l} ${fmtShort(vals[i])}</span>`).join('');
+  chartTipo=new Chart(document.getElementById('chartTipo'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed)}}}}
+  });
+}
+
+function updateChartUG(){
+  if(chartUG){chartUG.destroy();}
+  const labels=TOTALS_UG.map(([n])=>n.length>35?n.substring(0,33)+'…':n).reverse();
+  const vals=TOTALS_UG.map(([,v])=>v).reverse();
+  chartUG=new Chart(document.getElementById('chartUG'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:'#185FA5',borderRadius:3,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.x)}}},scales:{x:{ticks:{callback:v=>fmtShort(v),font:{size:10}},grid:{color:'rgba(128,128,128,0.1)'}},y:{ticks:{font:{size:10}},grid:{display:false}}}}
+  });
+}
+
+function updateCredorTable(){
+  const grand=GRAND;
+  const rows=TOTALS_CREDOR.map(([nome,tipo,v],i)=>{
+    const pct=(v/grand*100).toFixed(1);
+    const badgeClass=tipo==='Contrato'?'tipo-contrato':'tipo-ac';
+    const badgeLabel=tipo==='Contrato'?'Contrato':'A. Compra';
+    return`<tr>
+      <td style="color:var(--color-text-secondary);font-size:11px">${i+1}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${nome}">${nome}</td>
+      <td><span class="tipo-badge ${badgeClass}">${badgeLabel}</span></td>
+      <td style="font-weight:500;white-space:nowrap">${fmt(v)}</td>
+      <td style="color:var(--color-text-secondary)">${pct}%</td>
+      <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span style="font-size:10px;color:var(--color-text-secondary);min-width:30px">${pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('credorBody').innerHTML=rows;
+  document.getElementById('tableCount').textContent='total: '+fmt(grand);
+}
+
+function updateGrupoTable(){
+  const grand=GRAND;
+  const rows=TOTALS_GRUPO.map(([grupo,elem,qtd,v])=>{
+    const pct=(v/grand*100).toFixed(1);
+    return`<tr>
+      <td>${grupo}</td>
+      <td>${elem}</td>
+      <td style="color:var(--color-text-secondary)">${qtd.toLocaleString('pt-BR')}</td>
+      <td style="font-weight:500">${fmt(v)}</td>
+      <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span style="font-size:10px;color:var(--color-text-secondary);min-width:30px">${pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('grupoBody').innerHTML=rows;
+}
+
+function updateAll(){
+  const data=filtered();
+  updateMetrics(data);
+  updateChartMes();
+  updateChartTipo();
+  updateChartUG();
+  updateCredorTable();
+  updateGrupoTable();
+}
+
+updateAll();
+</script>
