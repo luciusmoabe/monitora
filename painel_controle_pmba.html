@@ -774,6 +774,18 @@ function parseData(rows, sheetName, fileName) {
     });
   }
 
+  // Remove exact duplicate records
+  const uniqueKeys = new Set();
+  const rawUnique = [];
+  for (const row of RAW) {
+    const key = row.numLIQ + '|' + row.valor + '|' + row.mes + '|' + row.elemCod + '|' + row.grupoCod + '|' + row.nomeCredor;
+    if (!uniqueKeys.has(key)) {
+      uniqueKeys.add(key);
+      rawUnique.push(row);
+    }
+  }
+  RAW = rawUnique;
+
   document.getElementById('loadingBar').style.display = 'none';
   if (RAW.length === 0) {
     showError('Nenhum registro encontrado na planilha "Controle".');
