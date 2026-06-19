@@ -778,7 +778,7 @@ function parseData(rows, sheetName, fileName) {
   const uniqueKeys = new Set();
   const rawUnique = [];
   for (const row of RAW) {
-    const key = row.numLIQ + '|' + row.valor + '|' + row.mes + '|' + row.elemCod + '|' + row.grupoCod + '|' + row.nomeCredor;
+    const key = JSON.stringify(row);
     if (!uniqueKeys.has(key)) {
       uniqueKeys.add(key);
       rawUnique.push(row);
